@@ -1,0 +1,28 @@
+libunifloat
+===========
+
+A C library for high-precision floating-point computations.
+
+ABOUT:
+You can use this library instead of standart libm mathematical library for
+fast high-precision calculations. You do not have to change your source code
+since it's compatible with libm.
+
+The library was originally created in 2006-2007 as a part of bachelor's degree
+work at MIPT for testing various implementations of the libm library on different
+hardware platforms (see AUTHORS).
+
+INSTALL:
+    mkdir build
+    cd build
+    cmake .. -DCMAKE_INSTALL_PREFIX=/usr
+    make
+    make install
+
+USAGE:
+You have to add two compilation flags to your project:
+
+ -fno-builtin   do not use built-in math functions
+ -lunifloat     link with libunifloat library and call its functions (sin, cos, ...)
+
+Do not forget to remove -lm compilation flag from your build scripts.

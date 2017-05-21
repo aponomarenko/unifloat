@@ -1,0 +1,42 @@
+# How to build from source
+
+## Requirements
+
+### Common requirements
+In order to build libunifloat, you need to install several components:
+
+- A C compiler
+- CMake >= 2.6.0
+
+## Building
+First, you need to configure the compilation, using CMake. Go to the
+`build` dir. Create it if it doesn't exist.
+
+GNU/Linux and MacOS X:
+
+    cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Debug
+    make
+
+### CMake standard options
+Here is a list of the most interesting options provided out of the box by
+CMake.
+
+- CMAKE_BUILD_TYPE:     The type of build (can be Debug or Release)
+- CMAKE_INSTALL_PREFIX: The prefix to use when running make install (Default
+                        to /usr/local on GNU/Linux and MacOS X)
+- CMAKE_C_COMPILER:     The path to the C compiler
+- CMAKE_CXX_COMPILER:   The path to the C++ compiler
+
+## Installing
+If you want to install the library after compilation run:
+
+    make install
+
+## Testing
+Run in the build directory to compile tests executable:
+
+    make tests
+
+Execute tests:
+
+    ./tests/tests
