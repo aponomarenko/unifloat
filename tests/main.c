@@ -60,7 +60,7 @@ void test_point(const char* func_name, double (*func)(double), caller_UF func_UF
     #endif
 }
 
-void test_point_nx(const char* func_name, double (*func)(int, double), caller_UF_NX func_UF, int n, double x)
+void test_point_nx(const char* func_name, double (*func)(int, double), caller_UF_nx func_UF, int n, double x)
 {
     double res, res_UF;
     Unifloat* ures, * ures_UF;
@@ -73,7 +73,7 @@ void test_point_nx(const char* func_name, double (*func)(int, double), caller_UF
     printf("%s: ", func_name);
 
     res = func(n, x);
-    res_UF = call_UF_NX(func_UF, n, x);
+    res_UF = call_UF_nx(func_UF, n, x);
     
     ures = convertDouble_UF(res);
     ures_UF = convertDouble_UF(res_UF);

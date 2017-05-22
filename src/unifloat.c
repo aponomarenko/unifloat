@@ -1500,7 +1500,7 @@ Unifloat* power_UF(Unifloat* x, int n)
     int i;
     Unifloat* res, * tmp;
     res = convertInteger_UF(1);
-    for(i = 1; i < n+1; i++)
+    for(i = 1; i < n + 1; i++)
     {
         tmp = mul_UF(res, x);
         delete_UF(res);
@@ -1515,18 +1515,12 @@ Unifloat* power_UF(Unifloat* x, int n)
 //////////////////////////////////////////////////////////////////////
 Unifloat* factorial_UF(int n)
 {
-    int i;
-    Unifloat* res, * tmp1, * tmp2;
-    res = convertInteger_UF(1);
-    for(i = 1; i < n+1; i++)
-    {
-        tmp1 = convertInteger_UF(i);
-        tmp2 = mul_UF(res, tmp1);
-        delete_UFs(res, tmp1, NULL);
-        res = tmp2;
-    }
+    int i, res = 1;
 
-    return res;
+    for(i = 1; i < n + 1; i++)
+        res *= i;
+
+    return convertInteger_UF(res);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1554,9 +1548,9 @@ double call_UF(caller_UF func, double x)
 }
 
 //////////////////////////////////////////////////////////////////////////
-//                                call_UF_NX                            //
+//                                call_UF_nx                            //
 //////////////////////////////////////////////////////////////////////////
-double call_UF_NX(caller_UF_NX func, int n, double x)
+double call_UF_nx(caller_UF_nx func, int n, double x)
 {
     Unifloat* ux;
     Unifloat* ures;

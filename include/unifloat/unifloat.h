@@ -62,7 +62,7 @@ typedef enum UnifloatKind
 } UnifloatKind;
 
 /*!
-\brief The main structure. Represents a number in libUnifloat.
+\brief The main structure that represents a number in libunifloat.
 */
 typedef struct Unifloat
 {
@@ -78,17 +78,27 @@ typedef struct Unifloat
     UnifloatKind kind;
 } Unifloat;
 
+/**\brief The number PI.*/
 extern Unifloat* Pi;
+
+/**\brief The number GAMMA.*/
 extern Unifloat* Gamma;
+
+/**\brief The number E.*/
 extern Unifloat* E;
+
 extern Unifloat* Ln_2;
 extern Unifloat* Log2_e;
 extern Unifloat* Log10_e;
 extern Unifloat* Log2_10;
 extern Unifloat* Epsilon;
 
+/**\brief Initialize global variables.
+*
+*Call it when you start working with libunifloat.*/
 void initialize_UF(void);
-/**\brief Frees the memory used by internal variables.
+
+/**\brief Frees the memory used by global variables.
 *
 *Call it when you end working with libunifloat.*/
 void finalize_UF(void);
@@ -133,24 +143,24 @@ Unifloat* call2_arg2(caller_2Unifloat function, Unifloat* x, Unifloat* y);
 *\n The created object have to be removed later using \b delete_UF.*/
 Unifloat* create_UF(int sign, int exponent, UnifloatKind kind);
 
-/**Delete a Unifloat number and frees the used memory.*/
+/**\brief Delete a Unifloat number and frees the used memory.*/
 void delete_UF(Unifloat* u);
 
 /**\brief Delete a list of Unifloat numbers and frees the used memory.
 *
-*The last argument should be "NULL"*/
+*\n The last argument should be \b NULL*/
 void delete_UFs(Unifloat* u, ...);
 
 /**\brief Create a new Unifloat object that represent Zero.
 *
 *\return The new Unifloat Zero object.
-*\nThe created object have to be removed later using \b delete_UF.*/
+*\n The created object have to be removed later using \b delete_UF.*/
 Unifloat* createZero_UF(void);
 
 /**\brief Create a new Unifloat object that represent One.
 *
 *\return The new Unifloat One object.
-*\nThe created object have to be removed later using \b delete_UF. */
+*\n The created object have to be removed later using \b delete_UF. */
 Unifloat* createOne_UF(void);
 
 /**\brief Creates a copy of given Unifloat number.
@@ -182,13 +192,15 @@ Bool isUnderflow_UF(Unifloat* x);
 
 /**\brief Returns a absolute value of given number.
 *
-*\return Function creates and returns the object that have to be removed later using \b delete_UF.*/
+*\return The Unifloat object that represents absolute value of a number \b x.
+*\n Function creates and returns the object that have to be removed later using \b delete_UF.*/
 Unifloat* abs_UF(Unifloat* x);
 
-/**\brief Returns a normalized value of given number.
+/**\brief Returns a normalized value of a given number.
 *
 *Normalized Unifloat have the first bit of mantissa set to 1.
-*\return The function creates and returns the object that have to be removed later using \b delete_UF.*/
+*\return The Unifloat object that represents normalized value of a number \b x.
+*\n The function creates and returns the object that have to be removed later using \b delete_UF.*/
 Unifloat* normalize_UF(Unifloat* x);
 
 /**\brief Sets one bit of Unifloat mantissa to a given value.
@@ -315,15 +327,35 @@ Unifloat* convertBinaryString_UF(CString* number);
 *\n The function creates and returns the object that have to be removed later using \b delete_UF. */
 Unifloat* convertString_UF(CString* number);
 
+/**\brief Raise the value of Unifloat number \b x to the power of \b n.
+*
+*\return The Unifloat object that represents \b x in the power of \b n in Unifloat.
+*\n The function creates and returns the object that have to be removed later using \b delete_UF. */
 Unifloat* power_UF(Unifloat* x, int n);
+
+/**\brief Compute factorial of an integer number \b n.
+*
+*\return The Unifloat object that represents factorial of \b n in Unifloat.
+*\n The function creates and returns the object that have to be removed later using \b delete_UF. */
 Unifloat* factorial_UF(int n);
 
+/**\brief Print value of the Unifloat number \b x in double format to stdout.*/
 void print_UF(Unifloat* x);
 
+/**\brief Represents a template of any function that takes one Unifloat argument.*/
 typedef Unifloat* (*caller_UF) (Unifloat*);
-typedef Unifloat* (*caller_UF_NX) (int, Unifloat*);
 
+/**\brief Represents a template of any function that takes integer and Unifloat arguments (for Bessel functions).*/
+typedef Unifloat* (*caller_UF_nx) (int, Unifloat*);
+
+/**\brief Call any Unifloat function \b func with the \b x argument in double.
+*
+*\return The return value of the function \b func in double. */
 double call_UF(caller_UF func, double x);
-double call_UF_NX(caller_UF_NX func, int n, double x);
+
+/**\brief Call any Unifloat function \b func with the \b n and \b x arguments.
+*
+*\return The return value of the function \b func in double. */
+double call_UF_nx(caller_UF_nx func, int n, double x);
 
 #endif //UNIFLOAT_H_

@@ -25,6 +25,9 @@
 
 #include "unifloat/config.h"
 
+/*!
+\brief The structure that represents a string in libunifloat.
+*/
 typedef struct CString 
 {
     int len;

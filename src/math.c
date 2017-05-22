@@ -34,12 +34,12 @@ static double call_UF_I(caller_UF func, double x)
     return res;
 }
 
-static double call_UF_NX_I(caller_UF_NX func, int n, double x)
+static double call_UF_nx_I(caller_UF_nx func, int n, double x)
 {
     double res;
     
     initialize_UF();
-    res = call_UF_NX(func, n, x);
+    res = call_UF_nx(func, n, x);
     finalize_UF();
     
     return res;
@@ -177,15 +177,15 @@ float j1f(float x) {
 
 //Jn
 long double jnl(int n, long double x) {
-    return call_UF_NX_I(&jn_UF, n, x);
+    return call_UF_nx_I(&jn_UF, n, x);
 }
 
 double jn(int n, double x) {
-    return call_UF_NX_I(&jn_UF, n, x);
+    return call_UF_nx_I(&jn_UF, n, x);
 }
 
 float jnf(int n, float x) {
-    return call_UF_NX_I(&jn_UF, n, x);
+    return call_UF_nx_I(&jn_UF, n, x);
 }
 
 //Y0
@@ -216,15 +216,15 @@ float y1f(float x) {
 
 //Yn
 long double ynl(int n, long double x) {
-    return call_UF_NX_I(&yn_UF, n, x);
+    return call_UF_nx_I(&yn_UF, n, x);
 }
 
 double yn(int n, double x) {
-    return call_UF_NX_I(&yn_UF, n, x);
+    return call_UF_nx_I(&yn_UF, n, x);
 }
 
 float ynf(int n, float x) {
-    return call_UF_NX_I(&yn_UF, n, x);
+    return call_UF_nx_I(&yn_UF, n, x);
 }
 
 //GAMMA

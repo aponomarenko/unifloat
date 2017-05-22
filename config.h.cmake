@@ -6,9 +6,7 @@
 /* Version number of package */
 #define VERSION "${APPLICATION_VERSION}"
 
-
 /* Enable debuging in the librarty */
 #cmakedefine DEBUG_ON
 
 #endif // CONFIG_H_
-
