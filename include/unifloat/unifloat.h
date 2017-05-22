@@ -133,13 +133,13 @@ Unifloat* call1_arg1(caller_UF func, Unifloat* x);
 /**\brief Function needed to simplify memory management.
 *
 * In code "x = Foo(x, y)" variable x shold be deleted first.
-* Call "x = call1_arg1(&Foo, x, y)" and the old Unifloat x will be removed. */
+* Call "x = call2_arg1(&Foo, x, y)" and the old Unifloat x will be removed. */
 Unifloat* call2_arg1(caller_UF_xy func, Unifloat* x, Unifloat* y);
 
 /**\brief Function needed to simplify memory management.
 *
 * In code "x = Foo(y, x)" variable x shold be deleted first.
-* Call "x = call1_arg1(&Foo, y, x)" and the old Unifloat x will be removed. */
+* Call "x = call2_arg2(&Foo, y, x)" and the old Unifloat x will be removed. */
 Unifloat* call2_arg2(caller_UF_xy func, Unifloat* x, Unifloat* y);
 
 /**\brief Create a new Unifloat number.
