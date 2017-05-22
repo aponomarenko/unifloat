@@ -1,12 +1,17 @@
 libunifloat
 ===========
 
-A C library for high-precision floating-point computations.
+A C library for fast high-precision floating-point computations.
 
 ABOUT:
-You can use this library instead of standart libm mathematical library for
+You can use this library instead of a standart libm mathematical library for
 fast high-precision calculations. You do not have to change your source code
 since it's compatible with libm.
+
+You can use sin(), cos(), tan(), etc. functions from the library to minimize
+computation error w/o the change of your source code or rewrite your algorithms
+with the help of sin_UF(), cos_UF(), tan_UF(), etc. functions to perform
+long computations with extended precision.
 
 The library was originally created in 2006-2007 as a part of bachelor's degree
 work at MIPT for testing various implementations of the libm library on different
