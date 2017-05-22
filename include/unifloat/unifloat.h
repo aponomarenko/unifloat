@@ -115,26 +115,32 @@ extern Unifloat* infinity_UF;
 /**\brief The Not-A-Number Unifloat*/
 extern Unifloat* nan_UF;
 
-typedef Unifloat* (*caller_2Unifloat) (Unifloat*, Unifloat*);
-typedef Unifloat* (*caller_1Unifloat) (Unifloat*);
+/**\brief Represents a template of any function that takes one Unifloat argument.*/
+typedef Unifloat* (*caller_UF) (Unifloat*);
+
+/**\brief Represents a template of any function that takes integer and Unifloat arguments.*/
+typedef Unifloat* (*caller_UF_nx) (int, Unifloat*);
+
+/**\brief Represents a template of any function that takes two Unifloat arguments.*/
+typedef Unifloat* (*caller_UF_xy) (Unifloat*, Unifloat*);
 
 /**\brief brief Function needed to simplify memory management.
 *
 * In code "x = Foo(x)" variable x shold be deleted first.
 * Call "x = call1_arg1(&Foo, x)" and the old Unifloat x will be removed.*/
-Unifloat* call1_arg1(caller_1Unifloat function, Unifloat* x);
+Unifloat* call1_arg1(caller_UF func, Unifloat* x);
 
 /**\brief Function needed to simplify memory management.
 *
 * In code "x = Foo(x, y)" variable x shold be deleted first.
 * Call "x = call1_arg1(&Foo, x, y)" and the old Unifloat x will be removed. */
-Unifloat* call2_arg1(caller_2Unifloat function, Unifloat* x, Unifloat* y);
+Unifloat* call2_arg1(caller_UF_xy func, Unifloat* x, Unifloat* y);
 
 /**\brief Function needed to simplify memory management.
 *
 * In code "x = Foo(y, x)" variable x shold be deleted first.
 * Call "x = call1_arg1(&Foo, y, x)" and the old Unifloat x will be removed. */
-Unifloat* call2_arg2(caller_2Unifloat function, Unifloat* x, Unifloat* y);
+Unifloat* call2_arg2(caller_UF_xy func, Unifloat* x, Unifloat* y);
 
 /**\brief Create a new Unifloat number.
 *
@@ -341,12 +347,6 @@ Unifloat* factorial_UF(int n);
 
 /**\brief Print value of the Unifloat number \b x in double format to stdout.*/
 void print_UF(Unifloat* x);
-
-/**\brief Represents a template of any function that takes one Unifloat argument.*/
-typedef Unifloat* (*caller_UF) (Unifloat*);
-
-/**\brief Represents a template of any function that takes integer and Unifloat arguments (for Bessel functions).*/
-typedef Unifloat* (*caller_UF_nx) (int, Unifloat*);
 
 /**\brief Call any Unifloat function \b func with the \b x argument in double.
 *

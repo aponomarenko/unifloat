@@ -105,23 +105,23 @@ void finalize_UF()
     delete_UFs(max_UF, min_UF, infinity_UF, nan_UF, NULL);
 }
 
-Unifloat* call1_arg1(caller_1Unifloat function, Unifloat* x)
+Unifloat* call1_arg1(caller_UF func, Unifloat* x)
 {
-    Unifloat* optmp = (*function) (x);
+    Unifloat* optmp = (*func) (x);
     delete_UF(x);
     return optmp;
 }
 
-Unifloat* call2_arg1(caller_2Unifloat function, Unifloat* x, Unifloat* y)
+Unifloat* call2_arg1(caller_UF_xy func, Unifloat* x, Unifloat* y)
 {
-    Unifloat* optmp = (*function) (x, y);
+    Unifloat* optmp = (*func) (x, y);
     delete_UF(x);
     return optmp;
 }
 
-Unifloat* call2_arg2(caller_2Unifloat function, Unifloat* x, Unifloat* y)
+Unifloat* call2_arg2(caller_UF_xy func, Unifloat* x, Unifloat* y)
 {
-    Unifloat* optmp = (*function) (x, y);
+    Unifloat* optmp = (*func) (x, y);
     delete_UF(y);
     return optmp;
 }

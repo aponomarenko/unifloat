@@ -20,8 +20,8 @@
 /**\file debug.h
 *\brief Auxiliary module to help programmer to debug the library. */
 
-#ifndef DEBUG_H_
-#define DEBUG_H_
+#ifndef UF_DEBUG_H_
+#define UF_DEBUG_H_
 
 #include "unifloat/config.h"
 
@@ -42,4 +42,4 @@ void PRINT_C(const char* str);
 
 #endif //DEBUG_ON
 
-#endif //DEBUG_H_
+#endif //UF_DEBUG_H_
