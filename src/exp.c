@@ -49,8 +49,7 @@ Unifloat* exp2_UF(Unifloat* x)
      * a, b_even, b_odd - factors of chain fraction
      * temp - auxiliary variable
      */
-    uint k;
-    uint i;
+    unsigned i, k;
     int exponent = 0;
     Unifloat *res, *temp, *inaccuracy, *var, *optmp, *optmp2;
     Unifloat *a, *b_even, *b_odd, *preNumer, *curNumer, *preDenom, *curDenom;

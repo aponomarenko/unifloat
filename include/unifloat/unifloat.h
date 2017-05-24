@@ -26,28 +26,36 @@
 #ifndef UNIFLOAT_H_
 #define UNIFLOAT_H_
 
+#include <stdbool.h>
 #include "unifloat/config.h"
 #include "unifloat/cstring.h"
 
 /**\brief Maximal size of Unifloat mantissa*/
-#define MAX_SIZE_UNIFLOAT 7
-#define true 1
-#define false 0
+#define MAX_SIZE_UNIFLOAT 11
+
 /**\brief Maximal count of mantissa bits, that can be used for calculations*/
-#define PRECISION 90
+#define PRECISION 160
+
 /**\brief Specifies the accuracy of Unifloats comparing.*/
 #define COMPARE_PRECISION 15
+
+#define maxExp_FloatT 128
+#define minExp_FloatT -125
+#define digMant_FloatT 24
+#define digExp_FloatT 8
+#define size_FloatT 4
 
 #define maxExp_DoubleT 1024
 #define minExp_DoubleT -1021
 #define digMant_DoubleT 53
 #define digExp_DoubleT 11
 #define size_DoubleT 8
-#define sizeInLongs_DoubleT (sizeof(double) - 4) / sizeof(long) + 1
 
-typedef unsigned int uint;
-typedef unsigned long ulong;
-typedef int Bool;
+#define maxExp_LongDoubleT 16384
+#define minExp_LongDoubleT -16381
+#define digMant_LongDoubleT 64
+#define digExp_LongDoubleT 15
+#define size_LongDoubleT 10
 
 #ifdef DEBUG_ON
 extern long count_UF;
@@ -68,14 +76,17 @@ typedef struct Unifloat
 {
     /**\brief The sign of Unifloat is the same as of this field.*/
     int  sign;
+
     /**\brief The power of two*/
     int  exp;
+
+    /**\brief Kind of floating point number (Normal, Infinity, NaN).*/
+    UnifloatKind kind;
+
     /**\brief Mantissa of the number. 
     *
     *Not all bits are used. See \b PRECISION*/
-    uint mant[MAX_SIZE_UNIFLOAT]; 
-    /**\brief Kind of floating point number (Normal, Infinity, NaN).*/
-    UnifloatKind kind;
+    unsigned mant[MAX_SIZE_UNIFLOAT];
 } Unifloat;
 
 /**\brief The number PI.*/
@@ -102,6 +113,11 @@ void initialize_UF(void);
 *
 *Call it when you end working with libunifloat.*/
 void finalize_UF(void);
+
+/**\brief Check if libunifloat is initialized.
+*
+*Call it when you start working with libunifloat.*/
+bool is_initialized_UF(void);
 
 /**\brief Used to test the Unifloat for overflow*/
 extern Unifloat* max_UF;
@@ -179,22 +195,22 @@ Unifloat* clone(Unifloat* src);
 void copy(Unifloat* src, Unifloat* dst);
 
 /**\brief Check if the Kind of number is Normal.*/
-Bool isNormal_UF(Unifloat* x);
+bool isNormal_UF(Unifloat* x);
 
 /**\brief Check if the Kind of number is Infinity.*/
-Bool isInfinity_UF(Unifloat* x);
+bool isInfinity_UF(Unifloat* x);
 
 /**\brief Check if the Kind of number is NaN.*/
-Bool isNan_UF(Unifloat* x);
+bool isNan_UF(Unifloat* x);
 
 /**\brief Check if the Unifloat number is Zero.*/
-Bool isZero_UF(Unifloat* x);
+bool isZero_UF(Unifloat* x);
 
 /**\brief Check if the Unifloat number is overflowed.*/
-Bool isOverflow_UF(Unifloat* x);
+bool isOverflow_UF(Unifloat* x);
 
 /**\brief Check if the Unifloat number is underflowed.*/
-Bool isUnderflow_UF(Unifloat* x);
+bool isUnderflow_UF(Unifloat* x);
 
 /**\brief Returns a absolute value of given number.
 *
@@ -213,18 +229,18 @@ Unifloat* normalize_UF(Unifloat* x);
 *
 *\param index the bit number to be set.
 *\param bit the value of bit*/
-void setMant_UF(Unifloat* x, uint index, uint bit);
+void setMant_UF(Unifloat* x, unsigned index, unsigned bit);
 
 /**\brief Gets one bit of Unifloat mantissa.
 *
 *\param index the bit number to get.*/
-uint getMant_UF(Unifloat* x, uint index);
+unsigned getMant_UF(Unifloat* x, unsigned index);
 
 /**\brief Rounds a Unifloat number. 
 *
 *\return The function creates and returns the object that have to be removed later using \b delete_UF.
 *\param precision count of significant bits to save.*/
-Unifloat* round_UF(Unifloat* x, uint precision);
+Unifloat* round_UF(Unifloat* x, unsigned precision);
 
 /**\brief Rounds a Unifloat number. 
 *
@@ -348,6 +364,16 @@ Unifloat* factorial_UF(int n);
 /**\brief Print value of the Unifloat number \b x in double format to stdout.*/
 void print_UF(Unifloat* x);
 
+/**\brief Call any Unifloat function \b func with the \b x argument in float.
+*
+*\return The return value of the function \b func in float. */
+float call_UFf(caller_UF func, float x);
+
+/**\brief Call any Unifloat function \b func with the \b n and \b x arguments.
+*
+*\return The return value of the function \b func in float. */
+float call_UFf_nx(caller_UF_nx func, int n, float x);
+
 /**\brief Call any Unifloat function \b func with the \b x argument in double.
 *
 *\return The return value of the function \b func in double. */
@@ -357,5 +383,15 @@ double call_UF(caller_UF func, double x);
 *
 *\return The return value of the function \b func in double. */
 double call_UF_nx(caller_UF_nx func, int n, double x);
+
+/**\brief Call any Unifloat function \b func with the \b x argument in long double.
+*
+*\return The return value of the function \b func in long double. */
+long double call_UFl(caller_UF func, long double x);
+
+/**\brief Call any Unifloat function \b func with the \b n and \b x arguments.
+*
+*\return The return value of the function \b func in long double. */
+long double call_UFl_nx(caller_UF_nx func, int n, long double x);
 
 #endif //UNIFLOAT_H_

@@ -26,22 +26,32 @@
 static double call_UF_I(caller_UF func, double x)
 {
     double res;
-    
-    initialize_UF();
+    bool init_before = is_initialized_UF();
+
+    if (init_before==false)
+        initialize_UF();
+
     res = call_UF(func, x);
-    finalize_UF();
-    
+
+    if (init_before==false)
+        finalize_UF();
+
     return res;
 }
 
 static double call_UF_nx_I(caller_UF_nx func, int n, double x)
 {
     double res;
-    
-    initialize_UF();
+    bool init_before = is_initialized_UF();
+
+    if (init_before==false)
+        initialize_UF();
+
     res = call_UF_nx(func, n, x);
-    finalize_UF();
-    
+
+    if (init_before==false)
+        finalize_UF();
+
     return res;
 }
 

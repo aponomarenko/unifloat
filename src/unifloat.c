@@ -18,17 +18,31 @@
 */
 
 #include <stdio.h> //perror
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
-
 #include <stdlib.h> /* NULL */
 #include <stdarg.h> /* va_list */
+
+#include <string.h>
+#include <limits.h>
 
 #include "unifloat/unifloat.h"
 #include "unifloat/constants.h"
 #include "unifloat/exp.h"
 #include "unifloat/trig.h"
+
+#define maxExp_LongDoubleT_PPC 1024
+#define minExp_LongDoubleT_PPC -1021
+#define digMant_LongDoubleT_PPC 106
+#define digExp_LongDoubleT_PPC 11
+#define size_LongDoubleT_PPC 16
+
+#define maxExp_LongDoubleT_S390 16384
+#define minExp_LongDoubleT_S390 -16381
+#define digMant_LongDoubleT_S390 113
+#define digExp_LongDoubleT_S390 15
+#define size_LongDoubleT_S390 16
+
+typedef unsigned int uint;
+typedef unsigned long ulong;
 
 Unifloat* max_UF;
 Unifloat* min_UF;
@@ -45,6 +59,44 @@ Unifloat* Log2_10;
 Unifloat* Epsilon;
 
 static int initialized = 0;
+
+#ifdef DEBUG_ON
+long count_UF = 0;
+#endif
+
+//////////////////////////////////////////////////////////////////////////
+//                      call1_arg1                                      //
+//////////////////////////////////////////////////////////////////////////
+Unifloat* call1_arg1(caller_UF func, Unifloat* x)
+{
+    Unifloat* optmp = (*func) (x);
+    delete_UF(x);
+    return optmp;
+}
+
+//////////////////////////////////////////////////////////////////////////
+//                      call2_arg1                                      //
+//////////////////////////////////////////////////////////////////////////
+Unifloat* call2_arg1(caller_UF_xy func, Unifloat* x, Unifloat* y)
+{
+    Unifloat* optmp = (*func) (x, y);
+    delete_UF(x);
+    return optmp;
+}
+
+//////////////////////////////////////////////////////////////////////////
+//                      call2_arg2                                      //
+//////////////////////////////////////////////////////////////////////////
+Unifloat* call2_arg2(caller_UF_xy func, Unifloat* x, Unifloat* y)
+{
+    Unifloat* optmp = (*func) (x, y);
+    delete_UF(y);
+    return optmp;
+}
+
+//////////////////////////////////////////////////////////////////////////
+//                      initialize_UF                                   //
+//////////////////////////////////////////////////////////////////////////
 void initialize_UF()
 {
     int i;
@@ -94,6 +146,9 @@ void initialize_UF()
     min_UF = createOne_UF();
 }
 
+//////////////////////////////////////////////////////////////////////////
+//                      finalize_UF                                     //
+//////////////////////////////////////////////////////////////////////////
 void finalize_UF()
 {
     //finalizing math
@@ -105,30 +160,12 @@ void finalize_UF()
     delete_UFs(max_UF, min_UF, infinity_UF, nan_UF, NULL);
 }
 
-Unifloat* call1_arg1(caller_UF func, Unifloat* x)
-{
-    Unifloat* optmp = (*func) (x);
-    delete_UF(x);
-    return optmp;
+//////////////////////////////////////////////////////////////////////////
+//                      is_initialized_UF                               //
+//////////////////////////////////////////////////////////////////////////
+bool is_initialized_UF() {
+    return initialized;
 }
-
-Unifloat* call2_arg1(caller_UF_xy func, Unifloat* x, Unifloat* y)
-{
-    Unifloat* optmp = (*func) (x, y);
-    delete_UF(x);
-    return optmp;
-}
-
-Unifloat* call2_arg2(caller_UF_xy func, Unifloat* x, Unifloat* y)
-{
-    Unifloat* optmp = (*func) (x, y);
-    delete_UF(y);
-    return optmp;
-}
-
-#ifdef DEBUG_ON
-long count_UF = 0;
-#endif
 
 //////////////////////////////////////////////////////////////////////////
 //                      create_UF                                       //
@@ -213,7 +250,7 @@ void copy(Unifloat* src, Unifloat* dst)
 //////////////////////////////////////////////////////////////////////////
 //                    isOverflow_UF                                     //
 //////////////////////////////////////////////////////////////////////////
-Bool isOverflow_UF(Unifloat* x)
+bool isOverflow_UF(Unifloat* x)
 {
     Unifloat* optmp;
     int r;
@@ -231,7 +268,7 @@ Bool isOverflow_UF(Unifloat* x)
 //////////////////////////////////////////////////////////////////////////
 //                    isUnderflow_UF                                    //
 //////////////////////////////////////////////////////////////////////////
-Bool isUnderflow_UF(Unifloat* x)
+bool isUnderflow_UF(Unifloat* x)
 {
     Unifloat* optmp;
     int r;
@@ -343,7 +380,7 @@ int compare_UF(Unifloat* x, Unifloat* y)
 //////////////////////////////////////////////////////////////////////////
 //                      isNormal_UF                                     //
 //////////////////////////////////////////////////////////////////////////
-Bool isNormal_UF(Unifloat* x)
+bool isNormal_UF(Unifloat* x)
 {
     if(x->kind == Normal) 
         return true;
@@ -354,7 +391,7 @@ Bool isNormal_UF(Unifloat* x)
 //////////////////////////////////////////////////////////////////////////
 //                      isInfinity_UF                                   //
 //////////////////////////////////////////////////////////////////////////
-Bool isInfinity_UF(Unifloat* x)
+bool isInfinity_UF(Unifloat* x)
 {
     if(x->kind == Infinity)
         return true;
@@ -365,7 +402,7 @@ Bool isInfinity_UF(Unifloat* x)
 //////////////////////////////////////////////////////////////////////////
 //                      isNan_UF                                        //
 //////////////////////////////////////////////////////////////////////////
-Bool isNan_UF(Unifloat* x)
+bool isNan_UF(Unifloat* x)
 {
     if(x->kind == NaN) 
         return true;
@@ -376,7 +413,7 @@ Bool isNan_UF(Unifloat* x)
 //////////////////////////////////////////////////////////////////////////
 //                      isZero_UF                                       //
 //////////////////////////////////////////////////////////////////////////
-Bool isZero_UF(Unifloat* x)
+bool isZero_UF(Unifloat* x)
 {
     int i;
     
@@ -413,32 +450,49 @@ float convertUnifloat_Float(Unifloat* x)
 //////////////////////////////////////////////////////////////////////////
 double convertUnifloat_Double(Unifloat* x)
 {
-    double doubleInitial=0;
+    double res = 0;
     int m;
     uint um;
-    uint * bytes = (uint *)&doubleInitial;
-    m = x->exp;
-    m -=2;
-    um = m;
-    um = (um << 21) >> 1;
-    if(x->exp<2)
-        um &= ~(1<<(sizeof(int)*8-2));
+    uint * bytes;
+    double zero = 0.0;
+
+    if (x->kind == NaN)
+        res = zero/zero;
+    else if (x->kind == Infinity)
+    {
+        if (x->sign ==1)
+            res = 1/zero;
+        else
+            res = -1/zero;
+    }
     else
-        um |= (1<<(sizeof(int)*8-2));
+    { // Normal
+        m = x->exp;
+        m -=2;
 
-    bytes[1] &= 0xC00FFFFF;
-    bytes[1] |= um;
+        um = m;
+        um = (um << 21) >> 1;
 
-    bytes[1] += (x->mant[0] << 1) >> 12;
-    bytes[0] = (x->mant[0] << 21) + (x->mant[1] >> 11);
+        if(x->exp<2)
+            um &= ~(1<<(sizeof(int)*8-2));
+        else
+            um |= (1<<(sizeof(int)*8-2));
 
-    if(bytes[0] == ~0x0u)
-        bytes[1] += 0x1;
+        bytes = (uint *)&res;
+        bytes[1] &= 0xC00FFFFF;
+        bytes[1] |= um;
 
-    if(x->sign<0)
-        bytes[1] += (1<<(sizeof(int)*8 - 1));
-    
-    return doubleInitial;
+        bytes[1] += (x->mant[0] << 1) >> 12;
+        bytes[0] = (x->mant[0] << 21) + (x->mant[1] >> 11);
+
+        if(bytes[0] == ~0x0u)
+            bytes[1] += 0x1;
+
+        if(x->sign<0)
+            bytes[1] += (1<<(sizeof(int)*8 - 1));
+    }
+
+    return res;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -644,9 +698,9 @@ int convertUnifloat_Integer(Unifloat* x, int* error)
         return 0;
     }
 
-    for (i = x->exp;i > 0;i--)
+    for (i = x->exp; i > 0; i--)
     {
-        res += getMant_UF(x,i) * power;
+        res += getMant_UF(x, i) * power;
         power = power*2;
     }
 
@@ -656,8 +710,10 @@ int convertUnifloat_Integer(Unifloat* x, int* error)
         i = 1;
 
     for (; i <= PRECISION; i++)
+    {
         if (getMant_UF(x, i) == 1)
             *error = 2; // it means that conversion isn't precisely
+    }
 
     if (res > INT_MAX)
         *error = 3; // it means that result isn't representable in 'int' type
@@ -669,8 +725,7 @@ int convertUnifloat_Integer(Unifloat* x, int* error)
 //////////////////////////////////////////////////////////////////////////
 //                           convertFloat_UF                            //
 //////////////////////////////////////////////////////////////////////////
-Unifloat* convertFloat_UF(float number)
-{ // TODO
+Unifloat* convertFloat_UF(float number) {
     return convertDouble_UF((double)number);
 }
 
@@ -684,7 +739,7 @@ Unifloat* convertDouble_UF(double number)
     uint i, j;
     ulong *bytes, mask;
     uint bytesIndex;
-    uint digExp, digMant;
+    uint digExp, digMant, sizeInLongs;
     int maxExp;
     int exponent = 0x0;
 
@@ -693,6 +748,8 @@ Unifloat* convertDouble_UF(double number)
     digExp = digExp_DoubleT;
     digMant = digMant_DoubleT;
     maxExp = maxExp_DoubleT;
+    
+    sizeInLongs = (sizeof(double) - 4) / sizeof(long) + 1;
 
     bytes = (ulong *)&number;
     mask = 0x1;
@@ -700,7 +757,10 @@ Unifloat* convertDouble_UF(double number)
 
     for (i = 0; i < digMant - 1; i++)
     {
-        setMant_UF(res, digMant - i, (bytes[bytesIndex] & mask) / mask);
+        if(__BYTE_ORDER == __LITTLE_ENDIAN)
+            setMant_UF(res, digMant - i, (bytes[bytesIndex] & mask) / mask);
+        else
+            setMant_UF(res, digMant - i, (bytes[sizeInLongs - 1 - bytesIndex] & mask) / mask);
         
         mask <<= 1;
         if(mask == 0x0)
@@ -713,8 +773,11 @@ Unifloat* convertDouble_UF(double number)
     j = 0x1;
     for (i = 0; i < digExp; i++)
     {
-        exponent += ((bytes[bytesIndex] & mask) / mask * j);
-        
+        if(__BYTE_ORDER == __LITTLE_ENDIAN)
+            exponent += ((bytes[bytesIndex] & mask) / mask * j);
+        else
+            exponent += ((bytes[sizeInLongs - 1 - bytesIndex] & mask) / mask * j);
+
         mask <<= 1;
         if(mask == 0x0)
         {
@@ -748,18 +811,227 @@ Unifloat* convertDouble_UF(double number)
         else
             setMant_UF(res, 1, 1);
     }
-    
-    res->sign = 1 - 2 * ((bytes[bytesIndex] & mask) / mask);
-    
+
+    if(__BYTE_ORDER == __LITTLE_ENDIAN)
+        res->sign = 1 - 2 * ((bytes[bytesIndex] & mask) / mask);
+    else
+        res->sign = 1 - 2 * ((bytes[sizeInLongs - 1 - bytesIndex] & mask) / mask);
+
     return res;
 }
 
 //////////////////////////////////////////////////////////////////////////
 //                           convertLongDouble_UF                       //
 //////////////////////////////////////////////////////////////////////////
+static Unifloat* convertLongDouble16_UF(long double number)
+{
+    Unifloat* res;
+#if ( __powerpc__ || __powerpc64__ )
+    Unifloat* initRes;
+#endif
+
+    uint i, j;
+    ulong *bytes, mask;
+    uint bytesIndex;
+    uint digExp, digMant, sizeInLongs, size;
+    int maxExp;
+    int exponent = 0x0;
+
+    res = createZero_UF();
+
+#if ( __powerpc__ || __powerpc64__ )
+    digExp  = digExp_LongDoubleT_PPC;
+    digMant = digMant_LongDoubleT_PPC;
+    maxExp  = maxExp_LongDoubleT_PPC;
+    size    = size_LongDoubleT_PPC;
+#elif ( __s390__ || __s390x__ )
+    digExp  = digExp_LongDoubleT_S390;
+    digMant = digMant_LongDoubleT_S390;
+    maxExp  = maxExp_LongDoubleT_S390;
+    size    = size_LongDoubleT_S390;
+#else
+    digExp  = digExp_LongDoubleT;
+    digMant = digMant_LongDoubleT;
+    maxExp  = maxExp_LongDoubleT;
+    size    = size_LongDoubleT;
+#endif
+
+    sizeInLongs = (sizeof(long double) - 4) / sizeof(long) + 1;
+
+#if ( __powerpc__ || __powerpc64__ )
+    digMant /= 2;
+#endif
+
+    bytes = (ulong *)&number;
+    mask = 0x1;
+    bytesIndex = 0;
+
+    for(i = 0; i < digMant - 1; i++)
+    {
+        if(__BYTE_ORDER == __LITTLE_ENDIAN)
+            setMant_UF(res, digMant - i, (bytes[bytesIndex] & mask) / mask);
+        else
+            setMant_UF(res, digMant - i, (bytes[sizeInLongs - 1 - bytesIndex] & mask) / mask);
+
+        mask <<= 1;
+        if(mask == 0x0)
+        {
+            bytesIndex++;
+            mask = 0x1;
+        }
+    }
+
+    if(size == 10)
+    {
+        mask <<= 1;
+        if(mask == 0x0)
+        {
+            bytesIndex++;
+            mask = 0x1;
+        }
+    }
+
+    j = 0x1;
+    for(i = 0; i < digExp; i++)
+    {
+        if(__BYTE_ORDER == __LITTLE_ENDIAN)
+            exponent += ((bytes[bytesIndex] & mask) / mask * j);
+        else
+            exponent += ((bytes[sizeInLongs - 1 - bytesIndex] & mask) / mask * j);
+
+        mask <<= 1;
+        if(mask == 0x0)
+        {
+            bytesIndex++;
+            mask = 0x1;
+        }
+        j <<= 1;
+    }
+
+    if(exponent == maxExp * 2 - 1)   /* exponent == 0x111...11 */
+    {
+        setMant_UF(res, 1, 1);
+
+        if(getMant_UF(res, 2) == 1)
+            res->kind = NaN;
+        else
+            res->kind = Infinity;
+    }
+    else
+    {
+        res->kind = Normal;
+        res->exp = exponent - maxExp + 2;
+
+        if(exponent == 0x0)
+        {
+            setMant_UF(res, 1, 0);
+            res->exp++;
+            res = normalize_UF(res);
+            res = round_UF(res, PRECISION);
+        }
+        else
+            setMant_UF(res, 1, 1);
+    }
+
+    if(__BYTE_ORDER == __LITTLE_ENDIAN)
+        res->sign = 1 - 2 * ((bytes[bytesIndex] & mask) / mask);
+    else
+        res->sign = 1 - 2 * ((bytes[sizeInLongs - 1 - bytesIndex] & mask) / mask);
+
+#if ( __powerpc__ || __powerpc64__ )
+    initRes = clone(res);
+    res = createZero_UF(UniLongDoubleT);
+
+    bytes = (ulong *)&number;
+    mask = 0x1;
+    bytesIndex = 0;
+
+    for(i = 0; i < digMant - 1; i++)
+    {
+        if(__BYTE_ORDER == __LITTLE_ENDIAN)
+            setMant_UF(res, digMant - i, (bytes[bytesIndex] & mask) / mask);
+        else
+            setMant_UF(res, digMant - i, (bytes[sizeInLongs - 1 - bytesIndex] & mask) / mask);
+
+        mask <<= 1;
+        if(mask == 0x0)
+        {
+            bytesIndex++;
+            mask = 0x1;
+        }
+    }
+
+    if(size == 10)
+    {
+        mask <<= 1;
+        if(mask == 0x0)
+        {
+            bytesIndex++;
+            mask = 0x1;
+        }
+    }
+
+    j = 0x1;
+    for(i = 0; i < digExp; i++)
+    {
+        if(__BYTE_ORDER == __LITTLE_ENDIAN)
+            exponent += ((bytes[bytesIndex] & mask) / mask * j);
+        else
+            exponent += ((bytes[sizeInLongs - 1 - bytesIndex] & mask) / mask * j);
+
+        mask <<= 1;
+        if(mask == 0x0)
+        {
+            bytesIndex++;
+            mask = 0x1;
+        }
+        j <<= 1;
+    }
+
+    if(exponent == maxExp * 2 - 1)   /* exponent == 0x111...11 */
+    {
+        setMant_UF(res, 1, 1);
+
+        if(getMant_UF(res, 2) == 1)
+            res->kind = NaN;
+        else
+            res->kind = Infinity;
+    }
+    else
+    {
+        res->kind = Normal;
+        res->exp = exponent - maxExp + 2;
+
+        if(exponent == 0x0)
+        {
+            setMant_UF(res, 1, 0);
+            res->exp++;
+            res = normalize_UF(res);
+            res = round_UF(res, PRECISION);
+        }
+        else
+            setMant_UF(res, 1, 1);
+    }
+
+    if(__BYTE_ORDER == __LITTLE_ENDIAN)
+        res->sign = 1 - 2 * ((bytes[bytesIndex] & mask) / mask);
+    else
+        res->sign = 1 - 2 * ((bytes[sizeInLongs - 1 - bytesIndex] & mask) / mask);
+
+    if(isZero_UF(initRes) == false)
+        res = add_UF(res, initRes);
+#endif
+
+    return res;
+}
+
 Unifloat* convertLongDouble_UF(long double number)
-{ // TODO
-    return convertDouble_UF((double)number);
+{
+    if(sizeof(long double)==8)
+        return convertDouble_UF((double)number);
+
+    // 16-byte
+    return convertLongDouble16_UF(number);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -771,7 +1043,7 @@ Unifloat* round_UF(Unifloat* x, uint precision)
     uint globalIndex = (precision - localIndex) / (sizeof(int) * 8);
     
     int i;
-    Bool needRound = false;
+    bool needRound = false;
     uint transposition;
 
     if (isNormal_UF(x) == false)
@@ -946,7 +1218,7 @@ int compareWithPrecision_UF(Unifloat* x, Unifloat* y, int amount)
 //////////////////////////////////////////////////////////////////////////
 //                         setMant_UF                                   //
 //////////////////////////////////////////////////////////////////////////
-void setMant_UF(Unifloat* x, uint ind, uint bit)
+void setMant_UF(Unifloat* x, unsigned ind, unsigned bit)
 {
     uint localIndex = ((ind - 1) % (sizeof(int) * 8)) + 1;
     uint globalIndex = (ind - localIndex) / (sizeof(int) * 8);
@@ -965,7 +1237,7 @@ void setMant_UF(Unifloat* x, uint ind, uint bit)
 //                         getMant_UF                                   //
 //////////////////////////////////////////////////////////////////////////
 
-uint getMant_UF(Unifloat* x, uint ind)
+unsigned getMant_UF(Unifloat* x, unsigned ind)
 {
     uint localIndex = ((ind - 1) % (sizeof(int) * 8)) + 1;
     uint globalIndex = (ind - localIndex) / (sizeof(int) * 8);
@@ -1527,11 +1799,45 @@ Unifloat* factorial_UF(int n)
 //                          print_UF                                //
 //////////////////////////////////////////////////////////////////////
 void print_UF(Unifloat* x) {
-    printf("%.17g", convertUnifloat_Double(x));
+    printf("%.53f", convertUnifloat_Double(x));
 }
 
 //////////////////////////////////////////////////////////////////////////
-//                                call_UF                                //
+//                                call_UFf                              //
+//////////////////////////////////////////////////////////////////////////
+float call_UFf(caller_UF func, float x)
+{
+    Unifloat* ux;
+    Unifloat* ures;
+    float res;
+
+    ux = convertFloat_UF(x);
+    ures = (*func)(ux);
+    res = convertUnifloat_Float(ures);
+    delete_UFs(ux, ures, NULL);
+
+    return res;
+}
+
+//////////////////////////////////////////////////////////////////////////
+//                                call_UFf_nx                           //
+//////////////////////////////////////////////////////////////////////////
+float call_UFf_nx(caller_UF_nx func, int n, float x)
+{
+    Unifloat* ux;
+    Unifloat* ures;
+    float res;
+
+    ux = convertFloat_UF(x);
+    ures = (*func)(n, ux);
+    res = convertUnifloat_Float(ures);
+    delete_UFs(ux, ures, NULL);
+
+    return res;
+}
+
+//////////////////////////////////////////////////////////////////////////
+//                                call_UF                               //
 //////////////////////////////////////////////////////////////////////////
 double call_UF(caller_UF func, double x)
 {
@@ -1559,6 +1865,40 @@ double call_UF_nx(caller_UF_nx func, int n, double x)
     ux = convertDouble_UF(x);
     ures = (*func)(n, ux);
     res = convertUnifloat_Double(ures);
+    delete_UFs(ux, ures, NULL);
+
+    return res;
+}
+
+//////////////////////////////////////////////////////////////////////////
+//                                call_UFl                              //
+//////////////////////////////////////////////////////////////////////////
+long double call_UFl(caller_UF func, long double x)
+{
+    Unifloat* ux;
+    Unifloat* ures;
+    long double res;
+
+    ux = convertLongDouble_UF(x);
+    ures = (*func)(ux);
+    res = convertUnifloat_LongDouble(ures);
+    delete_UFs(ux, ures, NULL);
+
+    return res;
+}
+
+//////////////////////////////////////////////////////////////////////////
+//                                call_UFl_nx                           //
+//////////////////////////////////////////////////////////////////////////
+long double call_UFl_nx(caller_UF_nx func, int n, long double x)
+{
+    Unifloat* ux;
+    Unifloat* ures;
+    long double res;
+
+    ux = convertLongDouble_UF(x);
+    ures = (*func)(n, ux);
+    res = convertUnifloat_LongDouble(ures);
     delete_UFs(ux, ures, NULL);
 
     return res;

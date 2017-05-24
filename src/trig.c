@@ -261,7 +261,7 @@ Unifloat* tan_UF(Unifloat* x)
     tmp - auxiliary variable
     eps - contains EPSILON
     */
-    Bool cmpres;
+    int cmpres;
     Unifloat* res, *optmp, *optmp2;
     Unifloat* eps;
     Unifloat* One;
@@ -305,7 +305,7 @@ Unifloat* tan_UF(Unifloat* x)
 
     Two = convertInteger_UF(2);
     optmp = div_UF(Pi, Two);
-    cmpres = compare_UF(arg,optmp );
+    cmpres = compare_UF(arg, optmp);
     delete_UF(optmp);
 
     if(cmpres == 1)
@@ -644,7 +644,7 @@ Unifloat* atan_UF(Unifloat* x)
     delete_UF(optmp2);
 
     optmp = div_UF(Pi, Two);
-    if(compare_UF(res,optmp ) == 1)
+    if(compare_UF(res, optmp) == 1)
     {
         delete_UF(res);
         res = div_UF(Pi, Two);
@@ -798,11 +798,11 @@ Unifloat* atan2_UF(Unifloat* x, Unifloat* y)
 //////////////////////////////////////////////////////////////////////////
 Unifloat* arrangeArgument_UF(Unifloat* x)
 {
-    Unifloat* int_part, *optmp, *optmp2;
-    Unifloat* res;
-    uint  i;
+    unsigned i;
+    Unifloat* res, * int_part, *optmp, *optmp2;
     Unifloat* Two = convertInteger_UF(2);
-    Unifloat* TwoPi = mul_UF(Two, Pi);    
+    Unifloat* TwoPi = mul_UF(Two, Pi);
+
     res = clone(x);
     optmp2 = abs_UF(x);
     if(compare_UF(optmp2, TwoPi) == 1)

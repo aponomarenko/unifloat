@@ -1,0 +1,7 @@
+TODO
+====
+
+1) Fix memory leaks in Bessel and Gamma functions (delete temp variables properly after use, etc.)
+2) Implement convertUnifloat_LongDouble and convertUnifloat_Float functions
+3) Move hyperbolic functions to hyper.h
+4) ...

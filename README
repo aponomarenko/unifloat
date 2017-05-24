@@ -17,6 +17,9 @@ The library was originally created in 2006-2007 as a part of bachelor's degree
 work at MIPT for testing various implementations of the libm library on different
 hardware platforms (see AUTHORS).
 
+The library is currently used as part of the official LSB Core test suite for
+testing precision and behaviour of math functions.
+
 INSTALL:
     mkdir build
     cd build
