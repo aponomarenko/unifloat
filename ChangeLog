@@ -1,0 +1,22 @@
+Summary of Changes in release 1.1
+---------------------------------
+
+- Added functions:
+    
+      is_initialized_UF
+      call_UFf
+      call_UFf_nx
+      call_UFl
+      call_UFl_nx
+    
+- Implemented convertLongDouble_UF
+- Fixed convertUnifloat_Double
+- Fixed convertDouble_UF
+- Fixed print_UF
+- Increased precision
+- Fixed layout of Unifloat structure
+- Fixed call of initialize_UF/finalize_UF in sin, cos, etc. functions
+- Fixed tests
+- Use bool type from stdbool.h
+- Bumped SONAME
+- Added TODO file
